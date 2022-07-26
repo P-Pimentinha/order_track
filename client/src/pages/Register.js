@@ -2,17 +2,18 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import { Logo, Form, Alert } from '../components/index';
 import Wrapper from '../assets/wrappers/RegisterPage';
+import { useAppContext } from '../context/appContext';
 
 const initialState = {
   name: '',
   email: '',
   password: '',
   isMember: true,
-  showAlert: false,
 };
 
 const Register = () => {
   const [values, setValues] = useState(initialState);
+  const { isLoading, showAlert, displayAlert } = useAppContext();
 
   const handleChange = (e) => {
     setValues({ ...values, [e.target.name]: e.target.value });
@@ -20,7 +21,12 @@ const Register = () => {
 
   const onSubmit = (e) => {
     e.preventDefault();
-    console.log(e.target);
+    const { name, email, password, isMember } = values;
+    if (!email || !password || (!isMember && !name)) {
+      displayAlert();
+      return;
+    }
+    console.log(values);
   };
 
   const toggleMember = (e) => {
@@ -31,7 +37,7 @@ const Register = () => {
       <form className='form' onSubmit={onSubmit}>
         <Logo />
         <h3>{values.isMember ? 'Login' : 'Register'}</h3>
-        {values.showAlert && <Alert />}
+        {showAlert && <Alert />}
         {!values.isMember && (
           <Form
             type='text'
@@ -52,10 +58,7 @@ const Register = () => {
           value={values.password}
           handleChange={handleChange}
         />
-        <button
-          type='submit'
-          className='btn btn-block' /* disabled={isLoading} */
-        >
+        <button type='submit' className='btn btn-block' disabled={isLoading}>
           submit
         </button>
         <p>
