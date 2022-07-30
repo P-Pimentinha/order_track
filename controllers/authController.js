@@ -17,7 +17,7 @@ const register = async (req, res, next) => {
 
   const user = await User.create({ name, email, password });
 
-  user.createJWT();
+  const token = user.createJWT();
 
   res.status(StatusCodes.CREATED).json({
     user: {
@@ -26,6 +26,7 @@ const register = async (req, res, next) => {
       lastName: user.lastName,
       location: user.location,
     },
+    token,
     location: user.location,
   });
 };
@@ -49,9 +50,10 @@ const login = async (req, res) => {
     throw new UnAuthenticatedError('Invalid Credentials');
   }
 
+  const token = user.createJWT();
   user.password = undefined;
 
-  res.status(StatusCodes.OK).json({ user, location: user.location });
+  res.status(StatusCodes.OK).json({ user, token, location: user.location });
 
   res.send('login user');
 };
