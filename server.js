@@ -1,4 +1,5 @@
 import express from 'express';
+import morgan from 'morgan';
 const app = express();
 import dotenv from 'dotenv';
 dotenv.config();
@@ -14,6 +15,10 @@ import orderRouter from './routes/ordersRoutes.js';
 //middleware
 import notFoundMiddleware from './middleware/not-found.js';
 import errorHandlerMiddleware from './middleware/error-handler.js';
+
+if (process.env.NODE_ENV !== 'production') {
+  app.use(morgan('dev'));
+}
 
 app.use(express.json());
 

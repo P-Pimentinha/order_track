@@ -6,7 +6,7 @@ function App() {
     <div>
       <BrowserRouter>
         <Routes>
-          <Route path='/' element={<Dashboard />}></Route>
+          <Route path='/' element={<div>dashboard Hello</div>}></Route>
           <Route path='/register' element={<Register />}></Route>
           <Route path='/landing' element={<Landing />}></Route>
           <Route path='*' element={<Error />}></Route>
