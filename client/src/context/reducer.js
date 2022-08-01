@@ -88,6 +88,23 @@ const reducer = (state, action) => {
     };
   }
 
+  if (action.type === TOGGLE_SIDEBAR) {
+    return {
+      ...state,
+      showSidebar: !state.showSidebar,
+    };
+  }
+
+  if (action.type === LOGOUT_USER) {
+    return {
+      ...initialState,
+      user: null,
+      token: null,
+      jobLocation: '',
+      userLocation: '',
+    };
+  }
+
   throw new Error(`No such action: ${action.type}`);
 };
 

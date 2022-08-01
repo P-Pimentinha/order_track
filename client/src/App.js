@@ -16,7 +16,7 @@ function App() {
             }
           >
             {/* <Route index element={<Stats />} /> */}
-            <Route index element={<AllOrders />} />
+            <Route path='all-orders' element={<AllOrders />} />
             <Route path='profile' element={<Profile />} />
             <Route path='add-order' element={<AddOrder />} />
           </Route>
