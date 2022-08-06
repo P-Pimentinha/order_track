@@ -14,6 +14,11 @@ import {
   UPDATE_USER_BEGIN,
   UPDATE_USER_SUCCESS,
   UPDATE_USER_ERROR,
+  HANDLE_CHANGE,
+  CLEAR_VALUES,
+  CREATE_JOB_BEGIN,
+  CREATE_JOB_SUCCESS,
+  CREATE_JOB_ERROR,
 } from './action';
 import axios from 'axios';
 
@@ -31,6 +36,11 @@ const initialState = {
   userLocation: userLocation || '',
   jobLocation: userLocation || '',
   showSidebar: false,
+
+  isEditing: false,
+  editOrderId: '',
+  order: '',
+  company: '',
 };
 
 const AppContext = React.createContext();
@@ -153,8 +163,46 @@ const AppProvider = ({ children }) => {
 
       addUserToLocalStorage({ user, location, token });
     } catch (error) {
+      if (error.response.status !== 401) {
+        dispatch({
+          type: UPDATE_USER_ERROR,
+          payload: { msg: error.response.data.msg },
+        });
+      }
+    }
+    clearAlert();
+  };
+
+  const handleChange = ({ name, value }) => {
+    dispatch({
+      type: HANDLE_CHANGE,
+      payload: { name, value },
+    });
+  };
+
+  const clearValues = () => {
+    dispatch({ type: CLEAR_VALUES });
+  };
+
+  const createOrder = async () => {
+    dispatch({ type: CREATE_JOB_BEGIN });
+    try {
+      const { order, company, jobLocation } = state;
+
+      await authFetch.post('/orders', {
+        order,
+        company,
+        jobLocation,
+      });
       dispatch({
-        type: UPDATE_USER_ERROR,
+        type: CREATE_JOB_SUCCESS,
+      });
+      // call function instead clearValues()
+      dispatch({ type: CLEAR_VALUES });
+    } catch (error) {
+      if (error.response.status === 401) return;
+      dispatch({
+        type: CREATE_JOB_ERROR,
         payload: { msg: error.response.data.msg },
       });
     }
@@ -171,6 +219,9 @@ const AppProvider = ({ children }) => {
         toggleSidebar,
         logoutUser,
         updateUser,
+        handleChange,
+        clearValues,
+        createOrder,
       }}
     >
       {children}

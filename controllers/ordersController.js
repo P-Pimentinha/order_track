@@ -1,5 +1,18 @@
+import Order from '../models/Order.js';
+import { StatusCodes } from 'http-status-codes';
+import { BadRequestError, NotFoundError } from '../errors/index.js';
+
 const createOrder = async (req, res) => {
-  res.send('createOrder');
+  const { company, order } = req.body;
+
+  if (!company || !order) {
+    throw new BadRequestError('Please Provide All Values');
+  }
+
+  req.body.createdBy = req.user.userId;
+
+  const orders = await Order.create(req.body);
+  res.status(StatusCodes.CREATED).json({ orders });
 };
 
 const deleteOrder = async (req, res) => {
