@@ -14,9 +14,18 @@ import {
   UPDATE_USER_ERROR,
   HANDLE_CHANGE,
   CLEAR_VALUES,
-  CREATE_JOB_BEGIN,
-  CREATE_JOB_SUCCESS,
-  CREATE_JOB_ERROR,
+  CREATE_ORDER_BEGIN,
+  CREATE_ORDER_SUCCESS,
+  CREATE_ORDER_ERROR,
+  GET_ORDERS_SUCCESS,
+  GET_ORDERS_BEGIN,
+  SET_EDIT_ORDER,
+  DELETE_ORDER_BEGIN,
+  EDIT_ORDER_BEGIN,
+  EDIT_ORDER_SUCCESS,
+  EDIT_ORDER_ERROR,
+  CLEAR_FILTERS,
+  CHANGE_PAGE,
 } from './action';
 
 import { initialState } from './appContext';
@@ -141,7 +150,7 @@ const reducer = (state, action) => {
   }
 
   if (action.type === HANDLE_CHANGE) {
-    return { ...state, [action.payload.name]: action.payload.value };
+    return { ...state, page: 1, [action.payload.name]: action.payload.value };
   }
 
   if (action.type === CLEAR_VALUES) {
@@ -155,10 +164,10 @@ const reducer = (state, action) => {
     return { ...state, ...initialState };
   }
 
-  if (action.type === CREATE_JOB_BEGIN) {
+  if (action.type === CREATE_ORDER_BEGIN) {
     return { ...state, isLoading: true };
   }
-  if (action.type === CREATE_JOB_SUCCESS) {
+  if (action.type === CREATE_ORDER_SUCCESS) {
     return {
       ...state,
       isLoading: false,
@@ -167,7 +176,7 @@ const reducer = (state, action) => {
       alertText: 'New Order Created!',
     };
   }
-  if (action.type === CREATE_JOB_ERROR) {
+  if (action.type === CREATE_ORDER_ERROR) {
     return {
       ...state,
       isLoading: false,
@@ -175,6 +184,72 @@ const reducer = (state, action) => {
       alertType: 'danger',
       alertText: action.payload.msg,
     };
+  }
+
+  if (action.type === GET_ORDERS_BEGIN) {
+    return { ...state, isLoading: true, showAlert: false };
+  }
+  if (action.type === GET_ORDERS_SUCCESS) {
+    return {
+      ...state,
+      isLoading: false,
+      orders: action.payload.orders,
+      totalOrders: action.payload.totalOrders,
+      numOfPages: action.payload.numOfPages,
+    };
+  }
+
+  if (action.type === SET_EDIT_ORDER) {
+    const orderS = state.orders.find(
+      (order) => order._id === action.payload.id
+    );
+    const { _id, order, company, jobLocation } = orderS;
+    return {
+      ...state,
+      isEditing: true,
+      editOrderId: _id,
+      order,
+      company,
+      jobLocation,
+    };
+  }
+
+  if (action.type === DELETE_ORDER_BEGIN) {
+    return { ...state, isLoading: true };
+  }
+
+  if (action.type === EDIT_ORDER_BEGIN) {
+    return { ...state, isLoading: true };
+  }
+  if (action.type === EDIT_ORDER_SUCCESS) {
+    return {
+      ...state,
+      isLoading: false,
+      showAlert: true,
+      alertType: 'success',
+      alertText: 'Job Updated!',
+    };
+  }
+  if (action.type === EDIT_ORDER_ERROR) {
+    return {
+      ...state,
+      isLoading: false,
+      showAlert: true,
+      alertType: 'danger',
+      alertText: action.payload.msg,
+    };
+  }
+
+  if (action.type === CLEAR_FILTERS) {
+    return {
+      ...state,
+      search: '',
+      sort: 'latest',
+    };
+  }
+
+  if (action.type === CHANGE_PAGE) {
+    return { ...state, page: action.payload.page };
   }
 
   throw new Error(`No such action: ${action.type}`);

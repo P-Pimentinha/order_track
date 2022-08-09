@@ -1,7 +1,13 @@
 import React from 'react';
+import { OrdersContainer, SearchContainer } from '../../components';
 
 const AllOrders = () => {
-  return <div>AllOrders</div>;
+  return (
+    <>
+      <SearchContainer />
+      <OrdersContainer />
+    </>
+  );
 };
 
 export default AllOrders;

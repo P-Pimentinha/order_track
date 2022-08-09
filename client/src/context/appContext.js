@@ -1,4 +1,4 @@
-import React, { useReducer, useContext } from 'react';
+import React, { useReducer, useContext, useEffect } from 'react';
 import reducer from './reducer';
 import {
   DISPLAY_ALERT,
@@ -16,9 +16,18 @@ import {
   UPDATE_USER_ERROR,
   HANDLE_CHANGE,
   CLEAR_VALUES,
-  CREATE_JOB_BEGIN,
-  CREATE_JOB_SUCCESS,
-  CREATE_JOB_ERROR,
+  CREATE_ORDER_BEGIN,
+  CREATE_ORDER_SUCCESS,
+  CREATE_ORDER_ERROR,
+  GET_ORDERS_SUCCESS,
+  GET_ORDERS_BEGIN,
+  SET_EDIT_ORDER,
+  DELETE_ORDER_BEGIN,
+  EDIT_ORDER_BEGIN,
+  EDIT_ORDER_SUCCESS,
+  EDIT_ORDER_ERROR,
+  CLEAR_FILTERS,
+  CHANGE_PAGE,
 } from './action';
 import axios from 'axios';
 
@@ -41,6 +50,15 @@ const initialState = {
   editOrderId: '',
   order: '',
   company: '',
+
+  search: '',
+  sort: 'latest',
+  sortOptions: ['latest', 'oldest', 'a-z', 'z-a'],
+
+  orders: [],
+  totalOrders: 0,
+  numOfPages: 1,
+  page: 1,
 };
 
 const AppContext = React.createContext();
@@ -185,7 +203,7 @@ const AppProvider = ({ children }) => {
   };
 
   const createOrder = async () => {
-    dispatch({ type: CREATE_JOB_BEGIN });
+    dispatch({ type: CREATE_ORDER_BEGIN });
     try {
       const { order, company, jobLocation } = state;
 
@@ -195,18 +213,98 @@ const AppProvider = ({ children }) => {
         jobLocation,
       });
       dispatch({
-        type: CREATE_JOB_SUCCESS,
+        type: CREATE_ORDER_SUCCESS,
       });
       // call function instead clearValues()
       dispatch({ type: CLEAR_VALUES });
     } catch (error) {
       if (error.response.status === 401) return;
       dispatch({
-        type: CREATE_JOB_ERROR,
+        type: CREATE_ORDER_ERROR,
         payload: { msg: error.response.data.msg },
       });
     }
     clearAlert();
+  };
+
+  const getOrders = async () => {
+    const { search, sort, page } = state;
+
+    let url = `/orders?page=${page}&sort=${sort}`;
+
+    if (search) {
+      url = url + `&search=${search}`;
+    }
+
+    dispatch({ type: GET_ORDERS_BEGIN });
+    try {
+      const { data } = await authFetch(url);
+      console.log(data);
+
+      const { orders, totalOrders, numOfPages } = data;
+      dispatch({
+        type: GET_ORDERS_SUCCESS,
+        payload: {
+          orders,
+          totalOrders,
+          numOfPages,
+        },
+      });
+    } catch (error) {
+      console.log(error.response);
+      logoutUser();
+    }
+    clearAlert();
+  };
+
+  useEffect(() => {
+    getOrders();
+  }, []);
+
+  const setEditOrder = (id) => {
+    dispatch({ type: SET_EDIT_ORDER, payload: { id } });
+  };
+
+  const deleteOrder = async (orderID) => {
+    dispatch({ type: DELETE_ORDER_BEGIN });
+    try {
+      await authFetch.delete(`/orders/${orderID}`);
+      getOrders();
+    } catch (error) {
+      logoutUser();
+    }
+  };
+
+  const editOrder = async () => {
+    dispatch({ type: EDIT_ORDER_BEGIN });
+    try {
+      const { order, company, jobLocation } = state;
+
+      await authFetch.patch(`/orders/${state.editOrderId}`, {
+        company,
+        order,
+        jobLocation,
+      });
+      dispatch({
+        type: EDIT_ORDER_SUCCESS,
+      });
+      dispatch({ type: CLEAR_VALUES });
+    } catch (error) {
+      if (error.response.status === 401) return;
+      dispatch({
+        type: EDIT_ORDER_ERROR,
+        payload: { msg: error.response.data.msg },
+      });
+    }
+    clearAlert();
+  };
+
+  const clearFilters = () => {
+    dispatch({ type: CLEAR_FILTERS });
+  };
+
+  const changePage = (page) => {
+    dispatch({ type: CHANGE_PAGE, payload: { page } });
   };
 
   return (
@@ -222,6 +320,12 @@ const AppProvider = ({ children }) => {
         handleChange,
         clearValues,
         createOrder,
+        getOrders,
+        setEditOrder,
+        deleteOrder,
+        editOrder,
+        clearFilters,
+        changePage,
       }}
     >
       {children}

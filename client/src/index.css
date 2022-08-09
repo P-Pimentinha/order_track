@@ -310,6 +310,10 @@ ul {
   color: var(--primary-500);
 }
 
+.logoTwo {
+  height: 50px;
+}
+
 @media screen and (min-width: 992px) {
   .coffee-info {
     text-align: left;

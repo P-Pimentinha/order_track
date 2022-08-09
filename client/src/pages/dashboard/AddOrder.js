@@ -15,6 +15,7 @@ const AddOrder = () => {
     handleChange,
     clearValues,
     createOrder,
+    editOrder,
   } = useAppContext();
 
   const handleSubmit = (e) => {
@@ -26,7 +27,7 @@ const AddOrder = () => {
       return;
     }
     if (isEditing) {
-      // eventually editJob()
+      editOrder();
       return;
     }
     createOrder();
